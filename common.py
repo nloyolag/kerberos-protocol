@@ -1,6 +1,6 @@
 import base64
 from Crypto.Cipher import AES
-from Crypto.Hash import MD5
+from Crypto.Hash import MD5, SHA256
 from Crypto import Random
 
 #
