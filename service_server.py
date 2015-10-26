@@ -29,7 +29,7 @@ def connection_thread(connection):
 
     # Send message to Client
     #     Message H: Timestamp in clients authenticator encrypted with session key
-    message_h = common.MessageH(timestamp)
+    message_h = common.MessageH(authenticator.timestamp)
     message_h = common.encrypt_aes(message_h, SESSION_KEY)
     message_h = pickle.dumps(message_h)
     connection.sendall(message_h)
