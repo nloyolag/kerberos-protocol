@@ -34,7 +34,22 @@ def md5_hash(plaintext):
     return h
 
 # Class for the authenticator object to be sent through the procol
-class Authenticator:
+class MessageA:
+    def __init__(self, sessionKey):
+        self.sessionKey = sessionKey
+
+class MessageB:
+    def __init__(self, clientId, validityPeriod, clientSessionKey):
+        self.clientId = clientId
+        self.validityPeriod = validityPeriod
+        self.clientSessionKey = clientSessionKey
+
+class MessageC:
+    def __init__(self, ticket, serviceId):
+        self.ticket = ticket
+        self.serviceId = serviceId
+
+class MessageD:
     def __init__(self, clientID, timestamp):
         self.clientID = clientID
         self.timestamp = timestamp

@@ -21,14 +21,21 @@ def connection(connection):
 	# Client sends cleartext message with the user id requesting services
 	connection.send('user')
 	# Receive Client/TGS Session key encrypted using the secret key of the client
-	session_key = session.recv(4096)
+	message_a = session.recv(4096)
 	# Receive Ticket-Granting-Ticket encrypted using the key of the TGS
-	ticket_granting_ticket = session.recv(4096)
+	message_b = session.recv(4096)
 	# Decrypt session key with secret key of client
-	session_key = pickle.loads(session_key)
-	session_key = common.decrypt_aes(session_key, user_credentials[user])
-	# Send message composed with TGT and ID of requested service
-	connection.send(ticket_granting_ticket)
+	message_a = pickle.loads(message_a)
+	session_key = common.decrypt_aes(message_a.session_key, user_credentials[user])
+	# Message C composed with TGT and ID of requested service
+	message_c = common.MessageC(message_b, 'service')
+	# Message D authenticator with id and timestamp
+	message_d = common.MessageD('user', timestamp)
+	encrypted_message_d = encrypt_aes(message_d, session_key)
+	# Send message c and d
+	connection.send(message_c)
+	connection.send(encrypted_message_d)
+
 
 if __name__ == "__main__":
 	user = raw_input('Username: ')
