@@ -42,29 +42,27 @@ class MessageA:
     def __init__(self, sessionKey):
         self.sessionKey = sessionKey
 
+#Message B or E
 class MessageB:
     def __init__(self, clientId, validityPeriod, clientSessionKey):
         self.clientId = clientId
         self.validityPeriod = validityPeriod
         self.clientSessionKey = clientSessionKey
 
+#Ticket is class MessageB
 class MessageC:
     def __init__(self, ticket, serviceId):
         self.ticket = ticket
         self.serviceId = serviceId
 
+#Autenticator(clientID,timestamp) G and D
 class MessageD:
     def __init__(self, clientId, timestamp):
         self.clientID = clientID
         self.timestamp = timestamp
 
+#Client/server session key: communicate client and service
 class MessageF:
-    def __init__(self, clientId, validityPeriod, clientSessionKey):
-        self.clientId = clientId
-        self.validityPeriod = validityPeriod
-        self.clientSessionKey = clientSessionKey
-
-class MessageG:
     def __init__(self, clientSessionKey):
         self.clientSessionKey = clientSessionKey
 
