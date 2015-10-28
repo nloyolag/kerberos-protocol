@@ -26,8 +26,8 @@ def connection(connection):
 	# Receive Ticket-Granting-Ticket encrypted using the key of the TGS
 	message_b = session.recv(4096)
 	# Decrypt session key with secret key of client
-	message_a = pickle.loads(message_a)
-	session_key = common.decrypt_aes(message_a.session_key, user_credentials[user])
+	decrypted_message_a = common.decrypt_aes(message_a, user_credentials[user])
+	session_key = decrypted_message_a.session_key
 	# Message C composed with TGT and ID of requested service
 	message_c = common.MessageC(message_b, 'service')
 	# Message D authenticator with id and timestamp
@@ -39,7 +39,7 @@ def connection(connection):
 	# Receive messages e and f from TGS
 	message_e = session.recv(4096)
 	message_f = session.recv(4096)
-	
+
 	ss_connection(connection, message_e, message_f)
 
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	password = getpass.getpass('Password: ')
 	if check_password(password, user_credentials[user]):
 		print('Login successful')
-		
+		connection(connection)
 
 	else:
 		print('Invalid credentials')
