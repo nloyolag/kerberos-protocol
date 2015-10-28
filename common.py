@@ -1,6 +1,8 @@
 import base64
+import pickle
 from Crypto.Cipher import AES
-from Crypto.Hash import MD5, SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256
 from Crypto import Random
 
 #
@@ -16,6 +18,7 @@ unpad = lambda s: s[:-ord(s[len(s)-1:])]
 
 # Functions to encrypt and decrypt AES
 def encrypt_aes(plaintext, key):
+    plaintext = pickle.dumps(plaintext)
     plaintext = pad(plaintext)
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CBC, iv)
@@ -25,11 +28,12 @@ def decrypt_aes(ciphertext, key):
     ciphertext = base64.b64decode(ciphertext)
     iv = ciphertext[:16]
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(ciphertext[16:]))
+    plaintext = unpad(cipher.decrypt(ciphertext[16:]))
+    return pickle.loads(plaintext)
 
 # Function that returns the hash of a given plaintext
-def md5_hash(plaintext):
-    h = MD5.new()
+def sha256_hash(plaintext):
+    h = SHA256.new()
     h.update(plaintext)
     return h
 
@@ -52,4 +56,8 @@ class MessageC:
 class MessageD:
     def __init__(self, clientID, timestamp):
         self.clientID = clientID
+        self.timestamp = timestamp
+
+class MessageH:
+    def __init__(self, timestamp):
         self.timestamp = timestamp

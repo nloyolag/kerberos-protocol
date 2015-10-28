@@ -1,13 +1,12 @@
 import socket
 import thread
 import sys
-import pickle
 import common
 
 HOST = ''
 PORT = 8888
-PRIVATE_KEY = '1234'
-SESSION_KEY = '1234'
+PRIVATE_KEY = '1234123412341234'
+SESSION_KEY = '1234123412341234'
 
 # Function executed for each client attempting to connect
 def connection_thread(connection):
@@ -23,14 +22,15 @@ def connection_thread(connection):
     message_g = pickle.loads(message_g)
 
     # Decrypt ticket with SS secret key to retrieve session key
-    ticket = common.decrypt_aes(message_e)
+    ticket = common.decrypt_aes(message_e, PRIVATE_KEY)
 
     # Decrypt authenticator with session key
-    authenticator = common.decrypt_aes(message_g)
+    authenticator = common.decrypt_aes(message_g, PRIVATE_KEY)
 
     # Send message to Client
     #     Message H: Timestamp in clients authenticator encrypted with session key
-    message_h = common.encrypt_aes(authenticator.timestamp, SESSION_KEY)
+    message_h = common.MessageH(authenticator.timestamp)
+    message_h = common.encrypt_aes(message_h, SESSION_KEY)
     message_h = pickle.dumps(message_h)
     connection.sendall(message_h)
 
