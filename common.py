@@ -54,9 +54,19 @@ class MessageC:
         self.serviceId = serviceId
 
 class MessageD:
-    def __init__(self, clientID, timestamp):
+    def __init__(self, clientId, timestamp):
         self.clientID = clientID
         self.timestamp = timestamp
+
+class MessageF:
+    def __init__(self, clientId, validityPeriod, clientSessionKey):
+        self.clientId = clientId
+        self.validityPeriod = validityPeriod
+        self.clientSessionKey = clientSessionKey
+
+class MessageG:
+    def __init__(self, clientSessionKey):
+        self.clientSessionKey = clientSessionKey
 
 class MessageH:
     def __init__(self, timestamp):

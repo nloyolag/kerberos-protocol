@@ -5,7 +5,7 @@ import pickle
 import common
 import getpass
 
-# Credentials for user to login
+# Change timestamps
 
 HOST = ''
 PORT = 8888
@@ -35,6 +35,21 @@ def connection(connection):
 	# Send message c and d
 	connection.send(message_c)
 	connection.send(encrypted_message_d)
+	# Receive messages e and f from TGS
+	message_e = session.recv(4096)
+	message_f = session.recv(4096)
+	
+
+	""" Communication with SS """
+	# Client connects to the SS and sends message e encrypted with service's key and g encrypted using session key
+	connection.send(message_e)
+	message_g = common.MessageG('user', timestamp)
+	encrypted_message_g = encrypt_aes(message_g, session_key)
+	# Receives message h to confirm identity
+	encrypted_message_h = session.recv(4096)
+	# Decrypt confirmation and check timestamp
+	message_h = decrypt_aes(encrypted_message_h, session_key)
+	# Server provides service
 
 
 if __name__ == "__main__":
