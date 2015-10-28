@@ -18,6 +18,7 @@ def check_password(clear_password, password_hash):
 	return SHA256.new(clear_password).hexdigest() == password_hash
 
 def connection(connection):
+	""" Communication with TGS """
 	# Client sends cleartext message with the user id requesting services
 	connection.send('user')
 	# Receive Client/TGS Session key encrypted using the secret key of the client
@@ -39,7 +40,10 @@ def connection(connection):
 	message_e = session.recv(4096)
 	message_f = session.recv(4096)
 	
+	ss_connection(connection, message_e, message_f)
 
+
+def ss_connection(connection, message_e, message_f):
 	""" Communication with SS """
 	# Client connects to the SS and sends message e encrypted with service's key and g encrypted using session key
 	connection.send(message_e)
@@ -50,7 +54,6 @@ def connection(connection):
 	# Decrypt confirmation and check timestamp
 	message_h = decrypt_aes(encrypted_message_h, session_key)
 	# Server provides service
-
 
 if __name__ == "__main__":
 	user = raw_input('Username: ')
