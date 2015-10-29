@@ -1,6 +1,7 @@
 import socket
 import thread
 import sys
+import pickle
 import common
 
 HOST = ''
@@ -17,9 +18,6 @@ def connection_thread(connection):
     message_e = connection.recv(4096)
     message_g = connection.recv(4096)
 
-    message_e = pickle.loads(message_e)
-    message_g = pickle.loads(message_g)
-
     # Decrypt ticket with SS secret key to retrieve session key
     ticket = common.decrypt_aes(message_e, PRIVATE_KEY)
 
@@ -30,7 +28,6 @@ def connection_thread(connection):
     #     Message H: Timestamp in clients authenticator encrypted with session key
     message_h = common.MessageH(authenticator.timestamp)
     message_h = common.encrypt_aes(message_h, ticket.clientSessionKey)
-    message_h = pickle.dumps(message_h)
     connection.sendall(message_h)
 
     # Wait for requests from Client
