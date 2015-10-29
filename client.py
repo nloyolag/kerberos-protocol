@@ -1,4 +1,4 @@
-from socket import socket, AF_INET, SOCK_DGRAM
+from socket import socket, AF_INET, SOCK_STREAM
 import thread
 import sys
 import pickle
@@ -63,9 +63,14 @@ if __name__ == "__main__":
 	user = raw_input('Username: ')
 	password = getpass.getpass('Password: ')
 	if check_password(password, user_credentials[user]):
-		print('Login successful')
-		socket = socket(AF_INET, SOCK_DGRAM)
-		socket.bind((TGS_IP, PORT))
+		print 'Login successful'
+		try:
+			socket = socket(AF_INET, SOCK_STREAM)
+		except socket.error, msg:
+			print 'Failed to create socket. Error: ' + str(msg[0]) + 'Error message: ' + str(msg[1])
+			sys.exit()
+		print 'Connected succesfully'
+		socket.bind((HOST, PORT))
 		messages = tgs_connection(socket)
 		message_e = messages[0]
 		message_f = messages[1]
