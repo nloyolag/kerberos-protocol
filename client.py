@@ -49,33 +49,36 @@ def tgs_connection(connection):
 def ss_connection(connection, message_e, message_f):
 	""" Communication with SS """
 	# Client connects to the SS and sends message e encrypted with service's key and g encrypted using session key
-	connection.send(message_e)
+	connection.sendall(message_e)
 	timestamp = time.time
 	message_g = common.MessageD('user', timestamp)
 	encrypted_message_g = encrypt_aes(message_g, session_key)
 	# Receives message h to confirm identity
-	encrypted_message_h = session.recv(4096)
+	connection.listen(10)
+	encrypted_message_h = client.recv(4096)
 	# Decrypt confirmation and check timestamp
 	message_h = decrypt_aes(encrypted_message_h, session_key)
 	# Server provides service
 
 if __name__ == "__main__":
-	user = raw_input('Username: ')
-	password = getpass.getpass('Password: ')
-	if check_password(password, user_credentials[user]):
-		print 'Login successful'
-		try:
-			socket = socket(AF_INET, SOCK_STREAM)
-		except socket.error, msg:
-			print 'Failed to create socket. Error: ' + str(msg[0]) + 'Error message: ' + str(msg[1])
-			sys.exit()
-		print 'Connected succesfully'
+	#user = raw_input('Username: ')
+	#password = getpass.getpass('Password: ')
+	#if check_password(password, user_credentials[user]):
+	print 'Login successful'
+	
+	socket = socket(AF_INET, SOCK_STREAM)
+	print 'Socket created'
+	try:
 		socket.bind((HOST, PORT))
-		messages = tgs_connection(socket)
-		message_e = messages[0]
-		message_f = messages[1]
-		socket.bind((SS_IP, PORT))
-		ss_connection(socket, message_e, message_f)
-		socket.close()
-	else:
-		print('Invalid credentials')
+	except socket.error, msg:
+		print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+		sys.exit()
+	print 'Bind complete'
+	messages = tgs_connection(socket)
+	message_e = messages[0]
+	message_f = messages[1]
+	socket.bind((HOST, PORT))
+	ss_connection(socket, message_e, message_f)
+	socket.close()
+	#else:
+	#	print('Invalid credentials')
