@@ -58,7 +58,7 @@ class MessageC:
 #Autenticator(clientID,timestamp) G and D
 class MessageD:
     def __init__(self, clientId, timestamp):
-        self.clientID = clientID
+        self.clientId = clientId
         self.timestamp = timestamp
 
 #Client/server session key: communicate client and service
