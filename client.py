@@ -70,6 +70,7 @@ def ss_connection(connection, message_e, message_f):
 	connection.sendall(message_e)
 	timestamp = time.time
 	message_g = common.MessageD('user', timestamp)
+	# Session key missing
 	encrypted_message_g = common.encrypt_aes(message_g, session_key)
 
 	# Receives message h to confirm identity
