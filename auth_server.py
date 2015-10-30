@@ -15,7 +15,7 @@ PORT = 8888
 
 def connection_thread(connection):
 	#Set private key of service server
-	
+
 	database['service'] = common.sha256_hash('1234123412341234').hexdigest()[0:16]
 	#set private key of tgs
 	database['tgs'] = common.sha256_hash('1234123412341234').hexdigest()[0:16]
