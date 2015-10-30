@@ -74,23 +74,19 @@ def ss_connection(connection, message_e, message_f):
 
 	# Session key missing
 	encrypted_message_g = common.encrypt_aes(message_g, message_f.clientSessionKey)
-	connection.sendall(message_g)
+	connection.sendall(encrypted_message_g)
 
 	# Receives message h to confirm identity
-
-	connection.listen(10)
-	encrypted_message_h = client.recv(4096)
+	encrypted_message_h = connection.recv(4096)
 
 	# Decrypt confirmation and check timestamp
 
 	decrypted_message_h = common.decrypt_aes(encrypted_message_h, message_f.clientSessionKey)
 	if decrypted_message_h.timestamp == timestamp:
 		connection.sendall("I trust you!")
-		connection.close()
 		return True
 	else:
 		connection.sendall("I dont trust you")
-		connection.close()
 		return False
 
 	# Server provides service
@@ -118,11 +114,8 @@ if __name__ == "__main__":
 	result = ss_connection(ss, message_e, message_f)
 
 	if result:
-		ss.connect((SS_IP, PORT))
-		while True:
-			output = raw_input()
-			ss.sendall(output)
+		print "Connection successful"
+	else:
+		print "Untrusted Server"
 
 	s.close()
-	#else:
-	#	print('Invalid credentials')

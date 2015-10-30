@@ -7,8 +7,8 @@ import time
 
 #user:password
 database = dict([('user', ''), ('service',''),('tgs','')])
-CLIENT_TGS_SESSION = '1234123412341234'
-CLIENT_SERVICE_SESSION = '1234123412341234'
+CLIENT_TGS_SESSION = common.sha256_hash('1234123412341234').hexdigest()[0:16]
+CLIENT_SERVICE_SESSION = common.sha256_hash('1234123412341234').hexdigest()[0:16]
 HOST = ""
 PORT = 8888
 
@@ -21,6 +21,7 @@ def connection_thread(connection):
 	database['tgs'] = common.sha256_hash('1234123412341234').hexdigest()[0:16]
 	#Set private key of user
 	database['user'] = common.sha256_hash('1234123412341234').hexdigest()[0:16]
+
 	#lifetime for messages to be valid
 	lifetime = 3600
     #Receive client ID

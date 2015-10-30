@@ -6,12 +6,10 @@ import common
 
 HOST = ''
 PORT = 8888
-PRIVATE_KEY = '1234123412341234'
+PRIVATE_KEY = common.sha256_hash('1234123412341234').hexdigest()[0:16]
 
 # Function executed for each client attempting to connect
 def connection_thread(connection):
-    connection.send("Connection Established. Waiting for message E and G...\n")
-
     # Receive 2 messages:
     #     Message E: Client to server ticket encryted with services secret key
     #     Message G: New authenticator(clientID, Timestamp) encrypted with session key
@@ -20,25 +18,20 @@ def connection_thread(connection):
 
     # Decrypt ticket with SS secret key to retrieve session key
     ticket = common.decrypt_aes(message_e, PRIVATE_KEY)
-
     # Decrypt authenticator with session key
     authenticator = common.decrypt_aes(message_g, ticket.clientSessionKey)
 
     # Send message to Client
     #     Message H: Timestamp in clients authenticator encrypted with session key
+    print authenticator.timestamp
     message_h = common.MessageH(authenticator.timestamp)
     message_h = common.encrypt_aes(message_h, ticket.clientSessionKey)
     connection.sendall(message_h)
 
     # Wait for requests from Client
-    while True:
-        data = conn.recv(4096)
-        reply = 'Received ' + data
-        if not data:
-            break
-
-        connection.sendall(reply)
-
+    data = connection.recv(4096)
+    reply = 'Received ' + data
+    print reply
     connection.close()
 
 
