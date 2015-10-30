@@ -59,6 +59,7 @@ def tgs_connection(connection):
 
 	message_e = connection.recv(4096)
 	message_f = connection.recv(4096)
+	message_f = common.decrypt_aes(message_f, session_key)
 	messages = [message_e, message_f]
 	return messages
 
@@ -68,10 +69,12 @@ def ss_connection(connection, message_e, message_f):
 	connection.connect((SS_IP, PORT))
 	print 'Connected successfully to ip ' + AUTH_IP
 	connection.sendall(message_e)
-	timestamp = time.time
+	timestamp = time.time()
 	message_g = common.MessageD('user', timestamp)
+
 	# Session key missing
-	encrypted_message_g = common.encrypt_aes(message_g, session_key)
+	encrypted_message_g = common.encrypt_aes(message_g, message_f.clientSessionKey)
+	connection.sendall(message_g)
 
 	# Receives message h to confirm identity
 
@@ -80,7 +83,16 @@ def ss_connection(connection, message_e, message_f):
 
 	# Decrypt confirmation and check timestamp
 
-	message_h = common.decrypt_aes(encrypted_message_h, session_key)
+	decrypted_message_h = common.decrypt_aes(encrypted_message_h, message_f.clientSessionKey)
+	if decrypted_message_h.timestamp == timestamp:
+		connection.sendall("I trust you!")
+		connection.close()
+		return True
+	else:
+		connection.sendall("I dont trust you")
+		connection.close()
+		return False
+
 	# Server provides service
 
 if __name__ == "__main__":
@@ -88,7 +100,7 @@ if __name__ == "__main__":
 	#password = getpass.getpass('Password: ')
 	#if check_password(password, user_credentials[user]):
 	print 'Login successful'
-	
+
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -103,7 +115,14 @@ if __name__ == "__main__":
 	message_e = messages[0]
 	message_f = messages[1]
 
-	ss_connection(ss, message_e, message_f)
+	result = ss_connection(ss, message_e, message_f)
+
+	if result:
+		ss.connect((SS_IP, PORT))
+		while True:
+			output = raw_input()
+			ss.sendall(output)
+
 	s.close()
 	#else:
 	#	print('Invalid credentials')
