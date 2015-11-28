@@ -5,7 +5,7 @@ import pickle
 import common
 
 HOST = ''
-PORT = 8888
+PORT = 8889
 PRIVATE_KEY = common.sha256_hash('1234123412341234').hexdigest()[0:16]
 
 # Function executed for each client attempting to connect
@@ -23,7 +23,6 @@ def connection_thread(connection):
 
     # Send message to Client
     #     Message H: Timestamp in clients authenticator encrypted with session key
-    print authenticator.timestamp
     message_h = common.MessageH(authenticator.timestamp)
     message_h = common.encrypt_aes(message_h, ticket.clientSessionKey)
     connection.sendall(message_h)
