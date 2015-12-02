@@ -39,12 +39,16 @@ def read_capture(filename):
             p[scapy.TCP].fields.update({'dst':p[scapy.IP].fields['dst']})
             if p.haslayer(scapy.Raw)==1:
                 p[scapy.TCP].fields.update({'Raw':(p[scapy.Raw].load)})
+            else:
+                p[scapy.TCP].fields.update({'Raw':''})
             tcp.append(p[scapy.TCP].fields)
         elif p.haslayer(scapy.UDP)==1:
             p[scapy.UDP].fields.update({'src':p[scapy.IP].fields['src']})
             p[scapy.UDP].fields.update({'dst':p[scapy.IP].fields['dst']})
             if p.haslayer(scapy.Raw)==1:
                 p[scapy.UDP].fields.update({'Raw':(p[scapy.Raw].load)})
+            else:
+                p[scapy.UDP].fields.update({'Raw':''})
             udp.append(p[scapy.UDP].fields)
     #Order the packets by sequence in case the stream needs to be reconstructed
     tcp = sorted(tcp, key=lambda paq: paq['seq'])
@@ -54,39 +58,35 @@ def read_capture(filename):
 
     return packets
 
-def read_packets_rules(rules,packets):
+def read_packets_rules(rule,packets):
     for packet in packets['tcp']:
-        for rule in rules:
-            printer = False
-            #Means the packet is TCP or UDP but not stream
-            if check_type(rule):
-                #Is a TCP packet
-                if rule['proto'].lower == 'tcp':
-                    if check_src_ip(rule,packet):
-                        if check_dst_ip(rule,packet):
-                            if check_src_port(rule,packet):   
-                                if check_dst_port(rule,packet):
-                                    #Check if the evil message exists in the packet
-                                    print "TCP Packet complies with rule characteristics"
+        printer = False
+        #Means the packet is TCP or UDP but not stream
+        if check_type(rule):
+            #Is a TCP packet
+            if rule['proto'].lower() == 'tcp':
+                if check_src_ip(rule,packet):
+                    if check_dst_ip(rule,packet):
+                        if check_src_port(rule,packet):
+                            if check_dst_port(rule,packet):
+                                check_message(rule, packet)
 
-                #Is a UDP packet
-                else:
-                    if check_src_ip(rule,packet):
-                        if check_dst_ip(rule,packet):
-                            if check_src_port(rule,packet):   
-                                if check_dst_port(rule,packet):
-                                    #Check if the evil message exists in the packet
-                                    print "UDP Packet complies with rule characteristics"
-                                    
-            #Checks for stream packets(conversation reconstruction)
-            #Check rule:host = packet:src rule:ip = packet:dst
-            elif rule['type'] == 'tcp_stream':
+            #Is a UDP packet
+            else:
                 if check_src_ip(rule,packet):
                     if check_dst_ip(rule,packet):
                         if check_src_port(rule,packet):   
                             if check_dst_port(rule,packet):
-                                #Check if the evil message exists in the packet
-                                print ""
+                                check_message(rule, packet)
+                                
+        #Checks for stream packets(conversation reconstruction)
+        #Check rule:host = packet:src rule:ip = packet:dst
+        elif rule['type'] == 'tcp_stream':
+            if check_src_ip(rule,packet):
+                if check_dst_ip(rule,packet):
+                    if check_src_port(rule,packet):   
+                        if check_dst_port(rule,packet):
+                            check_message(rule, packet)
                 
 
 def check_type(rule):
@@ -96,7 +96,7 @@ def check_type(rule):
 
 def check_src_port(rule,packet):
     if rule['src_port'] != 'any':
-        if rule['src_port'] == packet['sport']:
+        if rule['src_port'] == str(packet['sport']):
             return True
         else:
             return False
@@ -151,5 +151,8 @@ if __name__ == "__main__":
     script, rules_file, pcap_file = sys.argv
     rules = read_intructions(rules_file)
     packets = read_capture(pcap_file)
-    pprint(packets['tcp'])
-    # read_packets_rules(rules,packets)
+    #pprint(packets['tcp'])
+    read_packets_rules(rules,packets)
+
+
+
