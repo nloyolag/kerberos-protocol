@@ -1,4 +1,6 @@
 import sys
+import scapy.all as scapy
+from pprint import pprint
 
 def read_intructions(filename):
     rules = {}
@@ -25,6 +27,31 @@ def read_intructions(filename):
     rules['recv'] = recv
     return rules
 
+def read_capture(filename):
+    packets = scapy.rdpcap(filename)
+    #Hold the TCP packet fields
+    tcp = []
+    #Hold the UDP packet fields
+    udp = []
+    for p in packets:
+        if p.haslayer(scapy.TCP)==1:
+            p[scapy.TCP].fields.update({'src':p[scapy.IP].fields['src']})
+            p[scapy.TCP].fields.update({'dst':p[scapy.IP].fields['dst']})
+            tcp.append(p[scapy.TCP].fields)
+        elif p.haslayer(scapy.UDP)==1:
+            # p[scapy.UDP].fields.update({'src':p[scapy.IP].fields['src']})
+            # p[scapy.UDP].fields.update({'dst':p[scapy.IP].fields['dst']})
+            udp.append(p[scapy.UDP].fields)
+    #Order the packets by sequence in case the stream needs to be reconstructed
+    tcp = sorted(tcp, key=lambda paq: paq['seq'])
+    udp = sorted(udp, key=lambda paq: paq['dport'])
+    packets = {}
+    packets['tcp'] = tcp
+    packets['udp'] = udp
+
+    return packets
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) != 3:
@@ -33,3 +60,5 @@ if __name__ == "__main__":
 
     script, rules_file, pcap_file = sys.argv
     rules = read_intructions(rules_file)
+    packets = read_capture(pcap_file)
+    pprint(rules)
