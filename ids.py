@@ -126,7 +126,13 @@ def check_dst_ip(rule, packet):
     else:
         return True
 
-
+def check_message(rule, packet):
+    for sent in rules['send']:
+        if sent.lower() in packet['Raw'].lower():
+            print "Intruso detectado con regla " + rules['name']
+    for received in rules['recv']:
+        if received.lower() in packet['Raw'].lower():
+            print "Intruso detectado con regla " + rules['name']
 
 
 def print_alert(rule):

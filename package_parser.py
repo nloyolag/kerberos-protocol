@@ -2,7 +2,7 @@ import sys
 import scapy.all as scapy
 from pprint import pprint
 
-pkts = scapy.rdpcap("package.pcap")
+pkts = scapy.rdpcap("pcap_examples/test7.pcap")
 
 seq = []
 for p in pkts:
