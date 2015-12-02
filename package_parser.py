@@ -6,15 +6,18 @@ pkts = scapy.rdpcap("package.pcap")
 
 seq = []
 for p in pkts:
-	scapy.ls(p)
+	# print p.decode_payload_as('http')
+	# scapy.ls(p)
+
 	# if p.haslayer(scapy.TCP)==1:
 	# 	p[scapy.TCP].fields.update({'src':p[scapy.IP].fields['src']})
 	# 	p[scapy.TCP].fields.update({'dst':p[scapy.IP].fields['dst']})
 		# print p[scapy.IP].sprintf()
 	# 	seq.append(p[scapy.TCP].fields)
-	# if p.haslayer(scapy.UDP)==1:
+	if p.haslayer(scapy.IP)==1:
 		# seq.append(p[scapy.UDP].fields)
-		# print p[scapy.UDP].show()
+		print "="*40
+		print p[scapy.IP].show()
 # seq = sorted(seq, key=lambda paq: paq['seq'])
 # pprint(seq[:20])
 # for pak in seq:

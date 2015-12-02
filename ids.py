@@ -51,7 +51,7 @@ def read_capture(filename):
 
     return packets
 
-def read_tcp_rules(rules,packets):
+def read_packets_rules(rules,packets):
     for packet in packets['tcp']:
         for rule in rules:
             printer = False
@@ -59,28 +59,34 @@ def read_tcp_rules(rules,packets):
             if check_type(rule):
                 #Is a TCP packet
                 if rule['proto'].lower == 'tcp':
-                    if check_src_port(rule,packet):
-                            if check_dst_port(rule,packet):
-                                    if check_dst_ip(rule,packet):
-                                        if check_src_ip(rule,packet):
-                                            #Check if the evil message exists in the packet
-                                            print "TCP Packet complies with rule characteristics"
+                    if check_src_ip(rule,packet):
+                        if check_dst_ip(rule,packet):
+                            if check_src_port(rule,packet):   
+                                if check_dst_port(rule,packet):
+                                    #Check if the evil message exists in the packet
+                                    print "TCP Packet complies with rule characteristics"
 
                 #Is a UDP packet
                 else:
-                    if check_src_port(rule,packet):
-                            if check_dst_port(rule,packet):
-                                    if check_dst_ip(rule,packet):
-                                        if check_src_ip(rule,packet):
-                                            #Check if the evil message exists in the packet
-                                            print "UDP Packet complies with rule characteristics"
+                    if check_src_ip(rule,packet):
+                        if check_dst_ip(rule,packet):
+                            if check_src_port(rule,packet):   
+                                if check_dst_port(rule,packet):
+                                    #Check if the evil message exists in the packet
+                                    print "UDP Packet complies with rule characteristics"
+                                    
             #Checks for stream packets(conversation reconstruction)
+            #Check rule:host = packet:src rule:ip = packet:dst
             elif rule['type'] == 'tcp_stream':
-                print "TCP_Stream packet"
+                if check_src_ip(rule,packet):
+                    if check_dst_ip(rule,packet):
+                        if check_src_port(rule,packet):   
+                            if check_dst_port(rule,packet):
+                                #Check if the evil message exists in the packet
+                
 
 def check_type(rule):
     if rule['type'] == 'protocol':
-        print "Type : Protocol found"
         return True
     return False
 
@@ -136,4 +142,4 @@ if __name__ == "__main__":
     rules = read_intructions(rules_file)
     packets = read_capture(pcap_file)
     pprint(rules)
-    read_tcp_rules(rules,packets)
+    read_packets_rules(rules,packets)
