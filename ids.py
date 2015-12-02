@@ -53,11 +53,78 @@ def read_capture(filename):
 
 def read_tcp_rules(rules,packets):
     for packet in packets['tcp']:
-        if 'proto' in rules and rules['proto'].lower == 'tcp':
-            if 'src_port' in rules and rules['src_port'] != 'any':
-                if rules['src_port'] == packet['sport']:
+        for rule in rules:
+            printer = False
+            #Means the packet is TCP or UDP but not stream
+            if check_type(rule):
+                #Is a TCP packet
+                if rule['proto'].lower == 'tcp':
+                    if check_src_port(rule,packet):
+                            if check_dst_port(rule,packet):
+                                    if check_dst_ip(rule,packet):
+                                        if check_src_ip(rule,packet):
+                                            #Check if the evil message exists in the packet
+                                            print "TCP Packet complies with rule characteristics"
+
+                #Is a UDP packet
+                else:
+                    if check_src_port(rule,packet):
+                            if check_dst_port(rule,packet):
+                                    if check_dst_ip(rule,packet):
+                                        if check_src_ip(rule,packet):
+                                            #Check if the evil message exists in the packet
+                                            print "UDP Packet complies with rule characteristics"
+            #Checks for stream packets(conversation reconstruction)
+            elif rule['type'] == 'tcp_stream':
+                print "TCP_Stream packet"
+
+def check_type(rule):
+    if rule['type'] == 'protocol':
+        print "Type : Protocol found"
+        return True
+    return False
+
+def check_src_port(rule,packet):
+    if rule['src_port'] != 'any':
+        if rule['src_port'] == packet['sport']:
+            return True
+        else:
+            return False
+    else:
+        return True
+
+def check_dst_port(rule,packet):
+    if rule['dst_port'] != 'any':
+        if rule['dst_port'] == packet['dport']:
+            return True
+        else:
+            return False
+    else:
+        return True
+
+def check_src_ip(rule, packet):
+    if rule['host'] != 'any':
+        if rule['host'] == packet['src']:
+            return True
+        else:
+            return False
+    else:
+        return True
+
+def check_dst_ip(rule, packet):
+    if rule['ip'] != 'any':
+        if rule['ip'] == packet['dst']:
+            return True
+        else:
+            return False
+    else:
+        return True
 
 
+
+
+def print_alert(rule):
+    print "MATCHED RULE : %s\nPROTO:%s\nSRCPORT:%s\nDSTPORT:%s\nIP%s"%(rule['name'],rule['proto'],rule['src_port'],rule['dst_port'],rule['ip'])
 
 if __name__ == "__main__":
 
@@ -69,3 +136,4 @@ if __name__ == "__main__":
     rules = read_intructions(rules_file)
     packets = read_capture(pcap_file)
     pprint(rules)
+    read_tcp_rules(rules,packets)
