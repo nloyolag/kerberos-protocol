@@ -51,6 +51,13 @@ def read_capture(filename):
 
     return packets
 
+def read_tcp_rules(rules,packets):
+    for packet in packets['tcp']:
+        for rule in rules:
+            if rule.proto.lower() == 'tcp':
+                if rule.src_port not 'any':
+                    if rule.src_port == packet['sport']
+
 
 if __name__ == "__main__":
 
