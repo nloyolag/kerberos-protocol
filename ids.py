@@ -37,14 +37,17 @@ def read_capture(filename):
         if p.haslayer(scapy.TCP)==1:
             p[scapy.TCP].fields.update({'src':p[scapy.IP].fields['src']})
             p[scapy.TCP].fields.update({'dst':p[scapy.IP].fields['dst']})
+            if p.haslayer(scapy.Raw)==1:
+                p[scapy.TCP].fields.update({'Raw':(p[scapy.Raw].load)})
             tcp.append(p[scapy.TCP].fields)
         elif p.haslayer(scapy.UDP)==1:
-            # p[scapy.UDP].fields.update({'src':p[scapy.IP].fields['src']})
-            # p[scapy.UDP].fields.update({'dst':p[scapy.IP].fields['dst']})
+            p[scapy.UDP].fields.update({'src':p[scapy.IP].fields['src']})
+            p[scapy.UDP].fields.update({'dst':p[scapy.IP].fields['dst']})
+            if p.haslayer(scapy.Raw)==1:
+                p[scapy.UDP].fields.update({'Raw':(p[scapy.Raw].load)})
             udp.append(p[scapy.UDP].fields)
     #Order the packets by sequence in case the stream needs to be reconstructed
     tcp = sorted(tcp, key=lambda paq: paq['seq'])
-    udp = sorted(udp, key=lambda paq: paq['dport'])
     packets = {}
     packets['tcp'] = tcp
     packets['udp'] = udp
@@ -83,6 +86,7 @@ def read_packets_rules(rules,packets):
                         if check_src_port(rule,packet):   
                             if check_dst_port(rule,packet):
                                 #Check if the evil message exists in the packet
+                                print ""
                 
 
 def check_type(rule):
@@ -141,5 +145,5 @@ if __name__ == "__main__":
     script, rules_file, pcap_file = sys.argv
     rules = read_intructions(rules_file)
     packets = read_capture(pcap_file)
-    pprint(rules)
-    read_packets_rules(rules,packets)
+    pprint(packets['tcp'])
+    # read_packets_rules(rules,packets)
